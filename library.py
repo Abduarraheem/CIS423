@@ -77,12 +77,16 @@ class DropColumnsTransformer(BaseEstimator, TransformerMixin):
   def fit(self, X, y = None):
     print("Warning: DropColumnsTransformer.fit does nothing.")
     return X
+
   def transform(self, X):
     assert isinstance(X, pd.core.frame.DataFrame), f'DropColumnsTransformer.transform expected Dataframe but got {type(X)} instead.'
-    assert set(self.column_list).issubset(X.columns), f"{set(self.column_list)-set(X.columns)} not in columns."
     X_ = X.copy()
+    columns = [col for col in self.column_list if col in X_.columns]
+    assert set(self.column_list).issubset(columns), f"{set(self.column_list)-set(columns)} not in columns."
     if self.action == 'drop':
-      X_ = X_.drop(columns=self.column_list)
+      X_ = X_.drop(columns=columns)
+    else:
+      X_ = X_[columns]
     return X_
 
   def fit_transform(self, X, y = None):
