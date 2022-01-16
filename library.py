@@ -117,3 +117,37 @@ class Sigma3Transformer(BaseEstimator, TransformerMixin):
   def fit_transform(self, X, y = None):
     result = self.transform(X)
     return result
+
+class TukeyTransformer(BaseEstimator, TransformerMixin):
+  def __init__(self, target_column, fence='outer'):
+    assert fence in ['inner', 'outer']
+    self.target_column = target_column
+    self.fence = fence
+    
+  def fit(self, X, y = None):
+    print("Warning: TukeyTransformer.fit does nothing.")
+    return X
+
+  def transform(self, X):
+    assert isinstance(X, pd.core.frame.DataFrame), f'TukeyTransformer.transform expected Dataframe but got {type(X)} instead.'
+    X_ = X.copy()
+    assert self.target_column in X_.columns.to_list(), f'unknown column {self.target_column}'
+    assert all([isinstance(v, (int, float)) for v in X_[self.target_column].to_list()])
+
+    #now add on outer fences
+    q1 = X_[self.target_column].quantile(0.25)
+    q3 = X_[self.target_column].quantile(0.75)
+    iqr = q3-q1
+    inner_low = q1-1.5*iqr
+    inner_high = q1+1.5*iqr
+    outer_low = q1-3*iqr
+    outer_high = q3+3*iqr
+    if self.fence == "outer":
+      X_[self.target_column] = X_[self.target_column].clip(lower=outer_low, upper=outer_high)
+    else:
+      X_[self.target_column] = X_[self.target_column].clip(lower=inner_low, upper=inner_high)
+
+    return X_
+  def fit_transform(self, X, y = None):
+    result = self.transform(X)
+    return result
