@@ -139,7 +139,7 @@ class TukeyTransformer(BaseEstimator, TransformerMixin):
     q3 = X_[self.target_column].quantile(0.75)
     iqr = q3-q1
     inner_low = q1-1.5*iqr
-    inner_high = q1+1.5*iqr
+    inner_high = q3+1.5*iqr
     outer_low = q1-3*iqr
     outer_high = q3+3*iqr
     if self.fence == "outer":
