@@ -4,6 +4,7 @@ from sklearn.base import BaseEstimator, TransformerMixin
 from sklearn.pipeline import Pipeline
 
 from sklearn.base import BaseEstimator, TransformerMixin #gives us the tools to build custom transformers
+from sklearn.impute import KNNImputer
 
 #This class maps values in a column, numeric or categorical.
 class MappingTransformer(BaseEstimator, TransformerMixin):
@@ -170,6 +171,26 @@ class MinMaxTransformer(BaseEstimator, TransformerMixin):
       X_[col] = [(value - col_min) / max_min for value in X_[col].to_list()] # new column
     return X_
 
+  def fit_transform(self, X, y = None):
+    result = self.transform(X)
+    return result
+
+class KNNTransformer(BaseEstimator, TransformerMixin):
+  def __init__(self,n_neighbors=5, weights="uniform", add_indicator=False):
+    self.n_neighbors = n_neighbors
+    self.weights=weights 
+    self.add_indicator=add_indicator
+
+  #your code
+  def fit(self, X, y = None):
+    print("Warning: KNNTransformer.fit does nothing.")
+    return
+  def transform(self, X):
+    assert isinstance(X, pd.core.frame.DataFrame), f'KNNTransformer.transform expected Dataframe but got {type(X)} instead.'
+    X_ = X.copy()
+    imputer = KNNImputer(n_neighbors=self.n_neighbors, weights=self.weights, add_indicator=self.add_indicator)  #do not add extra column for NaN
+    imputed_data = imputer.fit_transform(X_)
+    return pd.DataFrame(imputed_data, columns=X_.columns)
   def fit_transform(self, X, y = None):
     result = self.transform(X)
     return result
