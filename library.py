@@ -2,9 +2,25 @@ import pandas as pd
 import numpy as np
 from sklearn.base import BaseEstimator, TransformerMixin
 from sklearn.pipeline import Pipeline
-
-from sklearn.base import BaseEstimator, TransformerMixin #gives us the tools to build custom transformers
 from sklearn.impute import KNNImputer
+from sklearn.metrics import f1_score#, balanced_accuracy_score, precision_score, recall_score
+
+
+def find_random_state(df, labels, n=200):
+  var = []  #collect test_error/train_error where error based on F1 score
+  for i in range(1, 200):
+    train_X, test_X, train_y, test_y = train_test_split(df, labels, test_size=0.2, shuffle=True,
+                                                    random_state=i, stratify=labels)
+    model.fit(train_X, train_y)  #train model
+    train_pred = model.predict(train_X)  #predict against training set
+    test_pred = model.predict(test_X)    #predict against test set
+    train_error = f1_score(train_y, train_pred)  #how bad did we do with prediction on training data?
+    test_error = f1_score(test_y, test_pred)     #how bad did we do with prediction on test data?
+    error_ratio = test_error/train_error        #take the ratio
+    var.append(error_ratio)
+
+  rs_value = sum(var)/len(var)
+  return np.array(abs(var - rs_value)).argmin()  #find the index of the smallest value
 
 #This class maps values in a column, numeric or categorical.
 class MappingTransformer(BaseEstimator, TransformerMixin):
