@@ -4,6 +4,7 @@ from sklearn.base import BaseEstimator, TransformerMixin
 from sklearn.pipeline import Pipeline
 from sklearn.impute import KNNImputer
 from sklearn.metrics import f1_score#, balanced_accuracy_score, precision_score, recall_score
+from sklearn.model_selection import train_test_split
 
 
 def find_random_state(df, labels, n=200):
