@@ -6,6 +6,8 @@ from sklearn.impute import KNNImputer
 from sklearn.metrics import f1_score#, balanced_accuracy_score, precision_score, recall_score
 from sklearn.model_selection import train_test_split
 
+from sklearn.linear_model import LogisticRegressionCV
+model = LogisticRegressionCV(random_state=1, max_iter=5000)
 
 def find_random_state(df, labels, n=200):
   var = []  #collect test_error/train_error where error based on F1 score
