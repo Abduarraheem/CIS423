@@ -5,6 +5,9 @@ from sklearn.pipeline import Pipeline
 from sklearn.impute import KNNImputer
 from sklearn.metrics import f1_score#, balanced_accuracy_score, precision_score, recall_score
 from sklearn.model_selection import train_test_split
+from sklearn.metrics import precision_score, recall_score, f1_score, accuracy_score
+from sklearn.experimental import enable_halving_search_cv
+from sklearn.model_selection import HalvingGridSearchCV
 
 from sklearn.linear_model import LogisticRegressionCV
 model = LogisticRegressionCV(random_state=1, max_iter=5000)
@@ -253,3 +256,30 @@ def titanic_setup(titanic_table, transformer=titanic_transformer, rs=88, ts=.2):
 
 def customer_setup(customer_table, transformer=customer_transformer, rs=107, ts=.2):
   return dataset_setup(customer_table.drop(columns='Rating'), customer_table['Rating'].to_list(), transformer, rs=rs, ts=ts)
+
+def halving_search(model, grid, x_train, y_train, factor=3, scoring='roc_auc'):
+  #your code below
+  halving_cv = HalvingGridSearchCV(
+    model, grid,  #our model and the parameter combos we want to try
+    scoring=scoring,  #could alternatively choose f1, accuracy or others
+    n_jobs=-1,
+    min_resources="exhaust",
+    factor=factor,  #a typical place to start so triple samples and take top 3rd of combos on each iteration
+    cv=5, random_state=1234,
+    refit=True  #remembers the best combo and gives us back that model already trained and ready for testing
+  )
+
+  grid_result = halving_cv.fit(x_train, y_train)
+  return grid_result
+
+def threshold_results(thresh_list, actuals, predicted):
+  result_df = pd.DataFrame(columns=['threshold', 'precision', 'recall', 'f1', 'accuracy'])
+  for t in thresh_list:
+    yhat = [1 if v >=t else 0 for v in predicted]
+    #note: where TP=0, the Precision and Recall both become 0
+    precision = precision_score(actuals, yhat, zero_division=0)
+    recall = recall_score(actuals, yhat, zero_division=0)
+    f1 = f1_score(actuals, yhat)
+    accuracy = accuracy_score(actuals, yhat)
+    result_df.loc[len(result_df)] = {'threshold':t, 'precision':precision, 'recall':recall, 'f1':f1, 'accuracy':accuracy}
+  return result_df
