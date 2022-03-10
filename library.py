@@ -191,7 +191,10 @@ class MinMaxTransformer(BaseEstimator, TransformerMixin):
     for col in columns:
       col_min, col_max = X_[col].min(), X_[col].max() # get min and max for the current column.
       max_min = col_max - col_min   # subtract max and min
-      X_[col] = [(value - col_min) / max_min for value in X_[col].to_list()] # new column
+      if not max_min:
+        print(f'{col} has same min max not changing')
+      else:
+        X_[col] = [(value - col_min) / max_min for value in X_[col].to_list()] # new column
     return X_
 
   def fit_transform(self, X, y = None):
