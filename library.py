@@ -243,6 +243,21 @@ customer_transformer = Pipeline(steps=[
     ('imputer', KNNTransformer())
     ], verbose=True)
 
+loan_transformer = Pipeline(steps=[
+    ('drop', DropColumnsTransformer(['Loan_ID'], 'drop')),
+    ('E', MappingTransformer('Education', {'Graduate': 1, 'Not Graduate': 0})),
+    ('gender', MappingTransformer('Gender', {'Male': 0, 'Female': 1})),
+    ('M', MappingTransformer('Married', {'No': 0, 'Yes': 1})),
+    ('SE', MappingTransformer('Self_Employed', {'No': 0, 'Yes': 1})),
+    ('D', MappingTransformer('Dependents', {'0': 0, '1': 1, '2': 2, '3+': 3})),
+    ('ohe', OHETransformer(target_column='Property_Area')),
+    ('AI', TukeyTransformer('ApplicantIncome', 'outer')),
+    ('CI', TukeyTransformer('CoapplicantIncome', 'outer')),
+    ('LA', TukeyTransformer('LoanAmount', 'outer')),
+    ('scale', MinMaxTransformer()), 
+    ('imputer', KNNTransformer())
+    ], verbose=True)
+
 def dataset_setup(feature_table, labels, the_transformer, rs=1234, ts=.2):
   X_train, X_test, y_train, y_test = train_test_split(feature_table, labels, test_size=ts, shuffle=True,
                                                     random_state=rs, stratify=labels)
